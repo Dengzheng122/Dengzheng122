@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -45,7 +44,7 @@
     .header {
       background: linear-gradient(135deg, #1e40af, #2563eb);
       color: white;
-      padding: 0.875rem 2rem;
+      padding: 0.5rem 1.25rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -53,29 +52,33 @@
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+      min-height: 48px;
     }
 
     .header h1 {
-      font-size: 1.125rem;
+      font-size: 1rem;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 0.625rem;
-      letter-spacing: 0.05em;
+      gap: 0.5rem;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
     }
 
-    .header .logo {
-      width: 32px; height: 32px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: 900;
+    .header .logo-img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
     }
 
-    .header-actions { display: flex; gap: 0.5rem; }
+    .header-actions { display: flex; gap: 0.375rem; align-items: center; }
+
+    .header-actions .btn {
+      padding: 0.375rem 0.625rem;
+      font-size: 0.75rem;
+    }
 
     .btn {
       display: inline-flex;
@@ -117,7 +120,7 @@
     /* ===== 主布局 ===== */
     .main-container {
       display: flex;
-      height: calc(100vh - 57px);
+      height: calc(100vh - 48px);
       overflow: hidden;
     }
 
@@ -647,23 +650,33 @@
     /* ===== 响应式 ===== */
     @media (max-width: 1100px) {
       .main-container { flex-direction: column; height: auto; }
-      .form-panel { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--rule); }
-      .preview-panel { padding: 1rem; }
+      .form-panel { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--rule); padding: 1rem; }
+      .preview-panel { padding: 0.75rem; }
       .preview-container { width: 100%; max-width: 100%; padding: 1rem; }
+      .copy-bar { max-width: 100%; }
     }
     @media (max-width: 600px) {
+      .header { padding: 0.375rem 0.75rem; min-height: 42px; }
+      .header h1 { font-size: 0.875rem; }
+      .header .logo-img { width: 24px; height: 24px; }
+      .header-actions .btn { padding: 0.25rem 0.5rem; font-size: 0.6875rem; }
       .form-row { flex-direction: column; gap: 0; }
+      .form-group { margin-bottom: 0.625rem; }
+      .form-section { margin-bottom: 1rem; padding-bottom: 1rem; }
       .product-item {
-        grid-template-columns: 28px 1fr 56px 28px;
+        grid-template-columns: 24px 1fr 52px 28px;
+        gap: 0.25rem;
       }
+      .product-item .item-num { font-size: 0.6875rem; }
       .modal-add-form { flex-direction: column; }
+      .copy-bar .btn-copy { padding: 0.5rem; font-size: 0.8125rem; }
     }
   </style>
 </head>
 <body>
   <header class="header">
     <h1>
-      <span class="logo">天</span>
+      <img src="assets/logo.jpg" class="logo-img" alt="天美仕">
       天美仕报单填写系统
     </h1>
     <div class="header-actions">
@@ -832,30 +845,41 @@
 
   <script>
     // ===== 商品数据 =====
-    let PRODUCTS = [
+    const PRODUCTS_DEFAULT = [
+      { sku: 'H140029', name: '细胞活力净化套【黄精蛋白肽2盒+地龙肽胺丸2】' },
       { sku: 'H140002', name: '细胞抗衰蓝金套【黄精蛋白肽4盒】' },
-      { sku: 'H140003', name: '细胞焕能养生套组【黄精蛋白肽1盒+参杞丸2盒】' },
-      { sku: 'H140001', name: '天美仕益生菌粉' },
-      { sku: 'H140004', name: '胶原蛋白肽饮品' },
-      { sku: 'H140005', name: '人参精华液套装' },
-      { sku: 'H140006', name: '灵芝孢子粉胶囊' },
-      { sku: 'H140007', name: '燕窝银耳羹礼盒' },
-      { sku: 'H140008', name: '鱼油软胶囊' },
-      { sku: 'H140009', name: '酵素饮液' },
-      { sku: 'H140010', name: '红景天提取物片' },
+      { sku: 'H140040', name: '细胞菁纯套【龟鱼蛋白肽饮品3盒】' },
+      { sku: 'H140068', name: '细胞焕能养生套组【黄精蛋白肽1盒+参杞丸2盒】' },
+      { sku: 'H140055', name: '地龙肽胺丸套餐（4盒装）' },
+      { sku: 'HW0001', name: '多维手环套餐一【多维手环5条】' },
+      { sku: 'H140014', name: '细胞抗衰固盈套【黄精蛋白肽2盒+刀豆2盒】' },
+      { sku: 'H140013', name: '细胞抗衰元气套【黄精蛋白肽2盒+天御草2盒】' },
     ];
+    const PRODUCTS_VERSION = '2026-07-01-v1';
+    let PRODUCTS = PRODUCTS_DEFAULT.slice();
 
     let productCount = 0;
 
     // ===== 保存商品到 localStorage =====
     function saveProducts() {
-      try { localStorage.setItem('tms_products', JSON.stringify(PRODUCTS)); } catch(e) {}
+      try {
+        localStorage.setItem('tms_products', JSON.stringify(PRODUCTS));
+        localStorage.setItem('tms_products_ver', PRODUCTS_VERSION);
+      } catch(e) {}
     }
     function loadProducts() {
       try {
+        const savedVer = localStorage.getItem('tms_products_ver');
         const saved = localStorage.getItem('tms_products');
-        if (saved) PRODUCTS = JSON.parse(saved);
-      } catch(e) {}
+        if (saved && savedVer === PRODUCTS_VERSION) {
+          PRODUCTS = JSON.parse(saved);
+        } else {
+          PRODUCTS = PRODUCTS_DEFAULT.slice();
+          saveProducts();
+        }
+      } catch(e) {
+        PRODUCTS = PRODUCTS_DEFAULT.slice();
+      }
     }
 
     // ===== 初始化 =====
@@ -992,7 +1016,6 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/^(【.+】)$/gm, '<div class="bd-section-title">$1</div>')
-        .replace(/^(━━━━+)$/gm, '<hr class="bd-divider">')
         .replace(/^\s{2,}(.+)$/gm, '<div class="bd-line">$1</div>')
         .replace(/^(\s*天美仕报单资料\s*)$/, '<div class="bd-title">$1</div>');
       document.getElementById('baodanPreview').innerHTML = '<div class="bd-title">天美仕报单资料</div>' + html.replace('<div class="bd-title">天美仕报单资料</div>', '');
@@ -1039,9 +1062,7 @@
       const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
       let lines = [];
-      lines.push('━━━━━━━━━━━━━━━━━━━━');
       lines.push('    天美仕报单资料');
-      lines.push('━━━━━━━━━━━━━━━━━━━━');
       lines.push('');
 
       // 会员信息
@@ -1088,7 +1109,6 @@
 
       lines.push('');
       lines.push(`填单日期：${today}`);
-      lines.push('━━━━━━━━━━━━━━━━━━━━');
 
       return lines.join('\n');
     }
